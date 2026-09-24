@@ -1,0 +1,29 @@
+name: Deploy Frontend to S3
+
+# 1. When should this pipeline run?
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 2. Download our code from the GitHub repo into the runner
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 3. Log into AWS using the Secrets we saved
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1 # Change this if your S3 bucket is in a different region
+
+    # 4. Run the AWS CLI command to sync our files to the S3 bucket
+    - name: Deploy to S3
+      run: |
+        aws s3 sync . s3://cloudsurgeon-cicd-kamran-2026 --exclude ".git/*" --exclude ".github/*"
